@@ -1,3 +1,6 @@
+# survey-lab
+Professional survey platform for academic research built with Next.js and MongoDB made for Personal Project
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
