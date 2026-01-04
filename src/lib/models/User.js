@@ -23,14 +23,13 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-// Password hashing
-UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+// Password hashing middleware
+UserSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
-// Comparing Password
+// Password comparison method
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
