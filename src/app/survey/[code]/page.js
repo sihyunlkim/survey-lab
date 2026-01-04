@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { use } from 'react';
 
-export default function SurveyTakerPage() {
-  const params = useParams();
+export default function SurveyTakerPage({ params }) {
+  // Next.js 16: params는 Promise
+  const { code } = use(params);
+  
   const [survey, setSurvey] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
@@ -13,15 +15,19 @@ export default function SurveyTakerPage() {
 
   useEffect(() => {
     loadSurvey();
-  }, []);
+  }, [code]);
 
   const loadSurvey = async () => {
     try {
-      const res = await fetch(`/api/surveys/${params.code}`);
+      console.log('Fetching survey:', code);
+      const res = await fetch(`/api/surveys/${code}`);
+      
       if (res.ok) {
         const data = await res.json();
+        console.log('Survey loaded:', data);
         setSurvey(data);
       } else {
+        console.error('Survey not found');
         alert('Survey not found');
       }
     } catch (error) {
@@ -42,7 +48,6 @@ export default function SurveyTakerPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 필수 질문 체크
     const requiredQuestions = survey.questions.filter((q) => q.required);
     const unansweredRequired = requiredQuestions.filter((q) => !answers[q._id]);
 
@@ -51,7 +56,6 @@ export default function SurveyTakerPage() {
       return;
     }
 
-    // 응답 형식 변환
     const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => ({
       questionId,
       answer,
@@ -188,17 +192,31 @@ export default function SurveyTakerPage() {
   };
 
   if (loading) {
-    return <div className="text-center p-8">Loading survey...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading survey...</div>
+      </div>
+    );
   }
 
   if (!survey) {
-    return <div className="text-center p-8">Survey not found</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">😞</div>
+          <h2 className="text-2xl font-bold mb-2">Survey Not Found</h2>
+          <p className="text-gray-600">
+            This survey may have been deleted or is no longer active.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (submitted) {
     return (
-      <div className="max-w-2xl mx-auto p-6 text-center">
-        <div className="bg-green-50 p-8 rounded-lg">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-2xl w-full bg-white p-8 rounded-lg shadow text-center">
           <div className="text-6xl mb-4">✅</div>
           <h2 className="text-2xl font-bold text-green-700 mb-2">Thank You!</h2>
           <p className="text-gray-700">
@@ -210,31 +228,33 @@ export default function SurveyTakerPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <div className="bg-white p-8 rounded-lg shadow">
-        <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
-        {survey.description && (
-          <p className="text-gray-600 mb-6">{survey.description}</p>
-        )}
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="bg-white p-8 rounded-lg shadow">
+          <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
+          {survey.description && (
+            <p className="text-gray-600 mb-6">{survey.description}</p>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {survey.questions.map((question, index) => (
-            <div key={question._id} className="p-4 border rounded">
-              <label className="block font-medium mb-3">
-                {index + 1}. {question.questionText}
-                {question.required && <span className="text-red-500 ml-1">*</span>}
-              </label>
-              {renderQuestion(question)}
-            </div>
-          ))}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {survey.questions.map((question, index) => (
+              <div key={question._id} className="p-4 border rounded bg-gray-50">
+                <label className="block font-medium mb-3">
+                  {index + 1}. {question.questionText}
+                  {question.required && <span className="text-red-500 ml-1">*</span>}
+                </label>
+                {renderQuestion(question)}
+              </div>
+            ))}
 
-          <button
-            type="submit"
-            className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
-          >
-            Submit Survey
-          </button>
-        </form>
+            <button
+              type="submit"
+              className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition"
+            >
+              Submit Survey
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
