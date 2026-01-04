@@ -5,7 +5,7 @@ const answerSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
-  answer: mongoose.Schema.Types.Mixed,  // allowing different times
+  answer: mongoose.Schema.Types.Mixed,
 });
 
 const responseSchema = new mongoose.Schema({
@@ -14,13 +14,22 @@ const responseSchema = new mongoose.Schema({
     ref: 'Survey',
     required: true,
   },
+  respondent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false,  
+  },
   answers: [answerSchema],
   submittedAt: {
     type: Date,
     default: Date.now,
   },
   sessionId: String,
-  completionTime: Number,  // seconds
+  completionTime: Number,
+  isAnonymous: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 export default mongoose.models.Response || mongoose.model('Response', responseSchema);

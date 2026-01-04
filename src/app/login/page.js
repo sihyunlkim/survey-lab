@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';  // 👈 추가!
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -32,8 +35,8 @@ export default function LoginPage() {
         return;
       }
 
-      // 로그인 성공 - 대시보드로 이동
-      router.push('/dashboard');
+      // moving to callback URL 
+      router.push(callbackUrl);
       router.refresh();
     } catch (err) {
       setError('An error occurred. Please try again.');

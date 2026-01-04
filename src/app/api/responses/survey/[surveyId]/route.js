@@ -17,7 +17,7 @@ export async function GET(request, { params }) {
 
     await connectDB();
 
-    // checking the survey creator
+    // 설문 소유자 확인
     const survey = await Survey.findOne({
       _id: surveyId,
       creator: session.user.id,
@@ -31,9 +31,10 @@ export async function GET(request, { params }) {
     }
 
     const responses = await Response.find({ survey: surveyId })
+      .populate('respondent', 'name email')  // adding user info
       .sort({ submittedAt: -1 });
 
-    // stats calculation 
+    // stats calculation
     const stats = {
       totalResponses: responses.length,
       averageCompletionTime: responses.length > 0

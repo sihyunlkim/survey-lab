@@ -2,16 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { use } from 'react';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 export default function SurveyTakerPage({ params }) {
-  // Next.js 16: params는 Promise
   const { code } = use(params);
+  const { data: session, status } = useSession();
   
   const [survey, setSurvey] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [startTime] = useState(Date.now());
+  const [requiresAuth, setRequiresAuth] = useState(false);
 
   useEffect(() => {
     loadSurvey();
@@ -26,6 +29,11 @@ export default function SurveyTakerPage({ params }) {
         const data = await res.json();
         console.log('Survey loaded:', data);
         setSurvey(data);
+        
+        // 익명 응답 허용하지 않으면 로그인 필요
+        if (!data.anonymousResponses) {
+          setRequiresAuth(true);
+        }
       } else {
         console.error('Survey not found');
         alert('Survey not found');
@@ -47,6 +55,12 @@ export default function SurveyTakerPage({ params }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // 인증 필요한데 로그인 안 되어 있으면
+    if (requiresAuth && !session) {
+      alert('Please login to submit this survey');
+      return;
+    }
 
     const requiredQuestions = survey.questions.filter((q) => q.required);
     const unansweredRequired = requiredQuestions.filter((q) => !answers[q._id]);
@@ -71,6 +85,8 @@ export default function SurveyTakerPage({ params }) {
           surveyId: survey._id,
           answers: formattedAnswers,
           completionTime,
+          respondent: session?.user?.id || null,
+          isAnonymous: survey.anonymousResponses,
         }),
       });
 
@@ -191,7 +207,7 @@ export default function SurveyTakerPage({ params }) {
     }
   };
 
-  if (loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl">Loading survey...</div>
@@ -208,6 +224,26 @@ export default function SurveyTakerPage({ params }) {
           <p className="text-gray-600">
             This survey may have been deleted or is no longer active.
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (requiresAuth && status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full bg-white p-8 rounded-lg shadow text-center">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold mb-4">Login Required</h2>
+          <p className="text-gray-600 mb-6">
+            This survey requires you to be logged in to respond.
+          </p>
+          <Link
+            href={`/login?callbackUrl=/survey/${code}`}
+            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+          >
+            Login to Continue
+          </Link>
         </div>
       </div>
     );
@@ -234,6 +270,23 @@ export default function SurveyTakerPage({ params }) {
           <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
           {survey.description && (
             <p className="text-gray-600 mb-6">{survey.description}</p>
+          )}
+
+          {/* 사용자 정보 표시 */}
+          {!survey.anonymousResponses && session && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded">
+              <p className="text-sm text-blue-800">
+                <span className="font-medium">Responding as:</span> {session.user.name} ({session.user.email})
+              </p>
+            </div>
+          )}
+
+          {survey.anonymousResponses && (
+            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
+              <p className="text-sm text-gray-600">
+                🔒 Your responses will be collected anonymously
+              </p>
+            </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">

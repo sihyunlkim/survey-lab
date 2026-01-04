@@ -118,52 +118,68 @@ export default function ResultsPage({ params }) {
     }
   };
 
-  const downloadCSV = () => {
-    if (!data || !data.responses) return;
+const downloadCSV = () => {
+  if (!data || !data.responses) return;
 
-    const headers = ['Submitted At', 'Completion Time (s)'];
-    data.survey.questions.forEach((q, i) => {
-      headers.push(`Q${i + 1}: ${q.questionText}`);
-    });
+  // 👇 헤더 수정
+  const headers = ['Response #', 'Submitted At', 'Completion Time (s)'];
+  
+  // 익명이 아닌 설문이면 응답자 정보 추가
+  if (!data.survey.anonymousResponses) {
+    headers.push('Respondent Name', 'Respondent Email');
+  }
+  
+  data.survey.questions.forEach((q, i) => {
+    headers.push(`Q${i + 1}: ${q.questionText}`);
+  });
 
-    const rows = [headers];
+  const rows = [headers];
 
-    data.responses.forEach(response => {
-      const row = [
-        new Date(response.submittedAt).toLocaleString(),
-        response.completionTime || 'N/A',
-      ];
+  data.responses.forEach((response, index) => {
+    const row = [
+      data.responses.length - index,  // Response number
+      new Date(response.submittedAt).toLocaleString(),
+      response.completionTime || 'N/A',
+    ];
 
-      data.survey.questions.forEach(question => {
-        const answer = response.answers.find(
-          a => a.questionId.toString() === question._id.toString()
-        );
-        
-        if (answer) {
-          if (Array.isArray(answer.answer)) {
-            row.push(answer.answer.join('; '));
-          } else {
-            row.push(answer.answer);
-          }
+    // 👇 응답자 정보 추가
+    if (!data.survey.anonymousResponses) {
+      row.push(
+        response.respondent?.name || 'N/A',
+        response.respondent?.email || 'N/A'
+      );
+    }
+
+    data.survey.questions.forEach(question => {
+      const answer = response.answers.find(
+        a => a.questionId.toString() === question._id.toString()
+      );
+      
+      if (answer) {
+        if (Array.isArray(answer.answer)) {
+          row.push(answer.answer.join('; '));
         } else {
-          row.push('No answer');
+          row.push(answer.answer);
         }
-      });
-
-      rows.push(row);
+      } else {
+        row.push('No answer');
+      }
     });
 
-    const csv = rows.map(row => 
-      row.map(cell => `"${cell}"`).join(',')
-    ).join('\n');
+    rows.push(row);
+  });
 
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `survey-results-${surveyId}.csv`;
-    a.click();
-  };
+  const csv = rows.map(row => 
+    row.map(cell => `"${cell}"`).join(',')
+  ).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `survey-results-${surveyId}.csv`;
+  a.click();
+};
 
   if (status === 'loading' || loading) {
     return (
@@ -299,50 +315,66 @@ export default function ResultsPage({ params }) {
         </div>
 
         {/* Individual Responses */}
-        <div className="mt-8 bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Individual Responses</h2>
-          
-          {data.responses.length === 0 ? (
-            <p className="text-gray-500 italic">No responses yet</p>
-          ) : (
-            <div className="space-y-4">
-              {data.responses.map((response, index) => (
-                <div key={response._id} className="border-b pb-4 last:border-b-0">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">Response #{data.responses.length - index}</span>
-                    <span className="text-sm text-gray-600">
-                      {new Date(response.submittedAt).toLocaleString()}
-                      {response.completionTime && 
-                        ` • ${response.completionTime}s`
-                      }
-                    </span>
-                  </div>
-                  
-                  <div className="ml-4 space-y-2 text-sm">
-                    {data.survey.questions.map((question, qIndex) => {
-                      const answer = response.answers.find(
-                        a => a.questionId.toString() === question._id.toString()
-                      );
-
-                      return (
-                        <div key={question._id}>
-                          <span className="font-medium">Q{qIndex + 1}:</span>{' '}
-                          {answer ? (
-                            Array.isArray(answer.answer) 
-                              ? answer.answer.join(', ')
-                              : answer.answer
-                          ) : (
-                            <span className="text-gray-400 italic">No answer</span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+<div className="mt-8 bg-white p-6 rounded-lg shadow">
+  <h2 className="text-xl font-semibold mb-4">Individual Responses</h2>
+  
+  {data.responses.length === 0 ? (
+    <p className="text-gray-500 italic">No responses yet</p>
+  ) : (
+    <div className="space-y-4">
+      {data.responses.map((response, index) => (
+        <div key={response._id} className="border-b pb-4 last:border-b-0">
+          <div className="flex justify-between items-center mb-2">
+            <div>
+              <span className="font-medium">Response #{data.responses.length - index}</span>
+              {/* 👇 응답자 정보 표시 추가! */}
+              {!response.isAnonymous && response.respondent && (
+                <span className="ml-3 text-sm text-blue-600">
+                  by {response.respondent.name} ({response.respondent.email})
+                </span>
+              )}
+              {response.isAnonymous && (
+                <span className="ml-3 text-sm text-gray-500 italic">
+                  (Anonymous)
+                </span>
+              )}
             </div>
-          )}
+            <span className="text-sm text-gray-600">
+              {new Date(response.submittedAt).toLocaleString()}
+              {response.completionTime && 
+                ` • ${response.completionTime}s`
+              }
+            </span>
+          </div>
+          
+          <div className="ml-4 space-y-2 text-sm">
+            {data.survey.questions.map((question, qIndex) => {
+              const answer = response.answers.find(
+                a => a.questionId.toString() === question._id.toString()
+              );
+
+              return (
+                <div key={question._id}>
+                  <span className="font-medium">Q{qIndex + 1}:</span>{' '}
+                  {answer ? (
+                    Array.isArray(answer.answer) 
+                      ? answer.answer.join(', ')
+                      : answer.answer
+                  ) : (
+                    <span className="text-gray-400 italic">No answer</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
+      ))}
+    </div>
+  )}
+</div>
+
+
+
       </div>
     </div>
   );

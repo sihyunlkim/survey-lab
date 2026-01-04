@@ -218,17 +218,23 @@ export default function CreateSurveyPage() {
             </div>
 
             <div>
-              <label className="flex items-center cursor-pointer">
+            <label className="flex items-center cursor-pointer">
                 <input
-                  type="checkbox"
-                  checked={survey.anonymousResponses}
-                  onChange={(e) =>
+                type="checkbox"
+                checked={survey.anonymousResponses}
+                onChange={(e) =>
                     setSurvey({ ...survey, anonymousResponses: e.target.checked })
-                  }
-                  className="mr-2 w-4 h-4"
+                }
+                className="mr-2 w-4 h-4"
                 />
                 <span className="text-sm">Allow anonymous responses</span>
-              </label>
+            </label>
+            <p className="text-xs text-gray-500 mt-1 ml-6">
+                {survey.anonymousResponses 
+                ? "Anyone can respond without logging in" 
+                : "Only logged-in users can respond, and their identity will be recorded"
+                }
+            </p>
             </div>
           </div>
 

@@ -5,11 +5,11 @@ import Survey from '@/lib/models/Survey';
 
 export async function POST(request) {
   try {
-    const { surveyId, answers, completionTime } = await request.json();
+    const { surveyId, answers, completionTime, respondent, isAnonymous } = await request.json();
 
     await connectDB();
 
-    // 설문 확인
+    // checking survey
     const survey = await Survey.findById(surveyId);
     if (!survey || !survey.isActive) {
       return NextResponse.json(
@@ -18,10 +18,20 @@ export async function POST(request) {
       );
     }
 
+    
+    if (!survey.anonymousResponses && !respondent) {
+      return NextResponse.json(
+        { error: 'Authentication required for this survey' },
+        { status: 401 }
+      );
+    }
+
     const response = new Response({
       survey: surveyId,
       answers,
       completionTime,
+      respondent: respondent || null,  
+      isAnonymous: isAnonymous !== undefined ? isAnonymous : true, 
     });
 
     await response.save();
