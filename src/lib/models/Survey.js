@@ -49,7 +49,6 @@ const surveySchema = new mongoose.Schema({
   surveyCode: {
     type: String,
     unique: true,
-    required: true,
   },
 });
 
@@ -59,6 +58,7 @@ surveySchema.pre('save', function () {
     this.surveyCode = Math.random().toString(36).substring(2, 15);
   }
   this.updatedAt = Date.now();
+
 });
 
 export default mongoose.models.Survey || mongoose.model('Survey', surveySchema);
