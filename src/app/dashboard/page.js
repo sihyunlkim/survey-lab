@@ -187,19 +187,19 @@ const deleteSurvey = async (surveyId, surveyTitle) => {
                 <div className="space-y-2">
                   <Link
                     href={`/edit/${survey._id}`}
-                    className="block w-full py-2 bg-purple-500 text-white rounded hover:bg-purple-600 text-center text-sm font-medium transition"
+                    className="block w-full py-2 bg-jordy-blue-700 text-white rounded hover:bg-jordy-blue-800 text-center text-sm font-medium transition"
                   >
                     ✏️ Edit Survey
                   </Link>
                   <button
                     onClick={() => copyLink(survey.surveyCode)}
-                    className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-medium transition"
+                    className="w-full py-2 bg-jordy-blue-600 text-white rounded hover:bg-jordy-blue-700 text-sm font-medium transition"
                   >
                     📋 Copy Survey Link
                   </button>
                   <Link
                     href={`/results/${survey._id}`}
-                    className="block w-full py-2 bg-green-500 text-white rounded hover:bg-green-600 text-center text-sm font-medium transition"
+                    className="block w-full py-2 bg-jordy-blue-500 text-white rounded hover:bg-jordy-blue-600 text-center text-sm font-medium transition"
                   >
                     📊 View Results
                   </Link>
@@ -208,7 +208,7 @@ const deleteSurvey = async (surveyId, surveyTitle) => {
                   onClick={() => toggleActive(survey._id, survey.isActive)}
                   className={`w-full py-2 rounded text-sm font-medium transition ${
                   survey.isActive
-                  ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                  ? 'bg-jordy-blue-400 text-white hover:bg-jordy-blue-500'
                   : 'bg-gray-500 text-white hover:bg-gray-600'
                   }`}
                   >
