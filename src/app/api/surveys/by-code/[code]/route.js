@@ -4,7 +4,6 @@ import Survey from '@/lib/models/Survey';
 
 export async function GET(request, { params }) {
   try {
-    // 👇 Next.js 16: params는 Promise!
     const resolvedParams = await params;
     const code = resolvedParams.code;
     

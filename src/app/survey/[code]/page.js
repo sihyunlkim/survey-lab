@@ -23,14 +23,14 @@ export default function SurveyTakerPage({ params }) {
   const loadSurvey = async () => {
     try {
       console.log('Fetching survey:', code);
-      const res = await fetch(`/api/surveys/${code}`);
+      const res = await fetch(`/api/surveys/by-code/${code}`);
       
       if (res.ok) {
         const data = await res.json();
         console.log('Survey loaded:', data);
         setSurvey(data);
         
-        // 익명 응답 허용하지 않으면 로그인 필요
+        // login needed if not allowing anonymous responses
         if (!data.anonymousResponses) {
           setRequiresAuth(true);
         }
@@ -56,7 +56,7 @@ export default function SurveyTakerPage({ params }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 인증 필요한데 로그인 안 되어 있으면
+    //if login neeed but not logged in 
     if (requiresAuth && !session) {
       alert('Please login to submit this survey');
       return;

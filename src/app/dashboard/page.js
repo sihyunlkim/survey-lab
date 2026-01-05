@@ -39,6 +39,54 @@ export default function DashboardPage() {
     alert('Survey link copied to clipboard!');
   };
 
+  const toggleActive = async (surveyId, currentStatus) => {
+  if (!confirm(`Are you sure you want to ${currentStatus ? 'deactivate' : 'activate'} this survey?`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/surveys/${surveyId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isActive: !currentStatus }),
+    });
+
+    if (res.ok) {
+      loadSurveys(); // 새로고침
+    } else {
+      alert('Failed to update survey');
+    }
+  } catch (error) {
+    console.error('Error updating survey:', error);
+    alert('Failed to update survey');
+  }
+};
+
+const deleteSurvey = async (surveyId, surveyTitle) => {
+  if (!confirm(`Are you sure you want to delete "${surveyTitle}"? This cannot be undone and will delete all responses.`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/surveys/${surveyId}`, {
+      method: 'DELETE',
+    });
+
+    if (res.ok) {
+      alert('Survey deleted successfully');
+      loadSurveys(); // 새로고침
+    } else {
+      alert('Failed to delete survey');
+    }
+  } catch (error) {
+    console.error('Error deleting survey:', error);
+    alert('Failed to delete survey');
+  }
+};
+
+
+
+
   const handleSignOut = async () => {
     await signOut({ redirect: false });
     router.push('/');
@@ -72,7 +120,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 메인 컨텐츠 */}
+      {/* main contents*/}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">My Surveys</h2>
@@ -137,6 +185,12 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="space-y-2">
+                  <Link
+                    href={`/edit/${survey._id}`}
+                    className="block w-full py-2 bg-purple-500 text-white rounded hover:bg-purple-600 text-center text-sm font-medium transition"
+                  >
+                    ✏️ Edit Survey
+                  </Link>
                   <button
                     onClick={() => copyLink(survey.surveyCode)}
                     className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-medium transition"
@@ -149,12 +203,39 @@ export default function DashboardPage() {
                   >
                     📊 View Results
                   </Link>
+
+                  <button
+                  onClick={() => toggleActive(survey._id, survey.isActive)}
+                  className={`w-full py-2 rounded text-sm font-medium transition ${
+                  survey.isActive
+                  ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                  : 'bg-gray-500 text-white hover:bg-gray-600'
+                  }`}
+                  >
+                  {survey.isActive ? '⏸️ Deactivate' : '▶️ Activate'}
+                  </button>
+                  <button
+                  onClick={() => deleteSurvey(survey._id, survey.title)}
+                  className="w-full py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm font-medium transition"
+                  >
+                  🗑️ Delete Survey
+                  </button>
+
+
+
+
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+
+
+
+
+
     </div>
   );
 }

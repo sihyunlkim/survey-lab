@@ -12,7 +12,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-
+/* maybe add dark mode later on */
 
 body {
   background: var(--background);
