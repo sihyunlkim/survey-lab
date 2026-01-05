@@ -1,39 +1,46 @@
-# survey-lab
-Professional survey platform for academic research built with Next.js and MongoDB made for Personal Project
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# SurveyLab
 
-## Getting Started
+A professional survey platform for academic research built with Next.js and MongoDB made for Personal Project
 
-First, run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Live Demo
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**[View Live Application](link)**
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## About
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+SurveyLab is a full-stack web application designed for academic researchers to create, distribute, and analyze surveys.
 
-## Learn More
+## ✨ Features
 
-To learn more about Next.js, take a look at the following resources:
+- **Secure Authentication** - User registration and login with NextAuth.js
+- **Survey Builder** - Create surveys with 5 question types
+  - Multiple Choice
+  - Checkbox (Multiple Selection)
+  - Short Answer (Text)
+  - Rating Scale (1-5)
+  - Likert Scale
+- **Easy Sharing** - Generate unique survey links
+- **Anonymous & Authenticated Responses** - Toggle between modes
+- **Real-time Analytics** - View statistics with interactive visualizations
+- **Data Export** - Download results as CSV
+- **Survey Management** - Edit, activate/deactivate, or delete surveys
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Frontend:**
+- Next.js 
+- React
+- Tailwind CSS
+- NextAuth.js
 
-## Deploy on Vercel
+**Backend:**
+- Next.js API Routes
+- MongoDB with Mongoose ODM
+- bcrypt for password hashing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Deployment:**
+- Vercel
+- MongoDB Atlas
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
