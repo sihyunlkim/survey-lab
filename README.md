@@ -6,7 +6,7 @@ A professional survey platform for academic research built with Next.js and Mong
 
 ## Live Demo
 
-**[View Live Application](link)**
+**[View Live Application](https://survey-lab-xi.vercel.app/)**
 
 ## About
 
